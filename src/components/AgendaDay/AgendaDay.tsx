@@ -5,15 +5,25 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography'
 import { WithStyles, withStyles, Theme, createStyles } from '@material-ui/core/styles';
 
 import * as dateFns from 'date-fns';
+import { useSelector } from 'react-redux';
+import { getRemindersForDate } from '../../redux/selectors';
+import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import {createReminderKey} from '../AddReminder/AddReminder'
+import EventIcon from '@material-ui/icons/Event';
+import { convertInputStringToDate } from '../../utils/dateUtils';
 
 const styles = (theme: Theme) => createStyles({
 	remindersContainer: {
 		minHeight: '250px',
 		marginTop: '10px'
+	},
+	reminderList: {
+		overflowY: 'auto',
+		height: '300px',
+    	maxHeight: '300px',
 	},
 	closeButton: {
 		position: 'absolute',
@@ -40,6 +50,9 @@ const AgendaDay = (props: Props) => {
 	const { classes, agendaStatus, onClose } = props;
 	const dateTitle = agendaStatus.date ? dateFns.format( agendaStatus.date, 'LLLL do, yyyy' ) : 'Closing'
 
+	const getReminders = useSelector(getRemindersForDate)
+	const reminders = getReminders(agendaStatus?.date?.toISOString())
+
 	return (
 		<Dialog
 			open={ agendaStatus.isOpen }
@@ -49,16 +62,27 @@ const AgendaDay = (props: Props) => {
 			maxWidth='md'
 		>
 			<DialogTitle id='form-dialog-title'>
-				{ dateTitle }
+				Reminders for { dateTitle }
 				<IconButton aria-label='Close' className={ classes.closeButton } onClick={ onClose }>
 					<CloseIcon />
 				</IconButton>
 			</DialogTitle>
 			<Divider light />
 			<DialogContent className={ classes.remindersContainer }>
-				<Typography>
-					Use this space to list the reminders.
-				</Typography>
+				<List dense className={ classes.reminderList }>
+					{reminders.map(reminder => (
+						<React.Fragment key={createReminderKey(reminder)}>
+							<ListItem style={{backgroundColor: reminder.color}}>
+								<ListItemIcon><EventIcon /></ListItemIcon>
+								<ListItemText
+									primary={reminder.title}
+									secondary={convertInputStringToDate(reminder.datetime).toLocaleString()}
+								/>
+							</ListItem>
+							<Divider />
+						</React.Fragment>
+					))}
+				</List>
 			</DialogContent>
 		</Dialog>
 	);

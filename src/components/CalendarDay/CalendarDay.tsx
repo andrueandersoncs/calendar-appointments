@@ -3,6 +3,10 @@ import Avatar from '@material-ui/core/Avatar';
 import deepPurple from '@material-ui/core/colors/deepPurple';
 import { WithStyles, withStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { isSameMonth, isSameDay, getDate } from 'date-fns';
+import { useSelector } from 'react-redux';
+import { getRemindersForDate } from '../../redux/selectors';
+import { Chip } from '@material-ui/core';
+import {createReminderKey} from '../AddReminder/AddReminder'
 
 
 const styles = (theme: Theme) => createStyles({
@@ -54,7 +58,12 @@ const styles = (theme: Theme) => createStyles({
 		backgroundColor: deepPurple[800],
 	},
 	remindersContainer: {
-		height: '100%'
+		height: '7.5vh',
+		width: '12.5vw',
+		display: 'flex',
+		flexDirection: 'column',
+		textOverflow: 'ellipsis',
+		overflowY: 'auto'
 	}
 });
 
@@ -73,13 +82,21 @@ const CalendarDay = (props: Props) => {
 	const [ focused, setFocused ] = useState(false)
 
 	const isToday = isSameDay( dateObj.date, new Date() );
+
+	// nested ternary operators are nearly impossible to read
 	const avatarClass = isToday && focused ? classes.focusedTodayAvatar :
 		isToday ? classes.todayAvatar :
 		focused ? classes.focusedAvatar :
 		classes.dateNumber;
 
+	// without useCallback this will cause unnecessary re-renders of any component they're passed to as a prop
+	// every time this component function is executed these will be re-declared causing
+	// the default shallow (referential) equality checks to return false
 	const onMouseOver = () => setFocused(true)
 	const onMouseOut = () => setFocused(false)
+
+	const getReminders = useSelector(getRemindersForDate)
+	const reminders = getReminders(dateObj.date.toISOString())
 
 	return (
 		<div
@@ -94,7 +111,15 @@ const CalendarDay = (props: Props) => {
 		>
 			<Avatar className={ avatarClass }>{ getDate( dateObj.date ) }</Avatar>
 			<div className={ classes.remindersContainer }>
-				{/* reminders go here */}
+				{reminders.map(reminder => (
+					<Chip
+						key={createReminderKey(reminder)}
+						style={{backgroundColor: reminder.color}}
+						variant="outlined"
+						label={reminder.title}
+						size="small"
+					/>
+				))}
 			</div>
 		</div>
 	)

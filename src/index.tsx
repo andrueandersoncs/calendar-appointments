@@ -16,8 +16,10 @@ const store = createStore(
 	window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );
 
+export type RootState = ReturnType<typeof store.getState>
+
 ReactDOM.render(
-	<Provider store={ store as any}>
+	<Provider store={ store }>
 		<AppContainer />
 	</Provider>,
 	document.getElementById('root'));

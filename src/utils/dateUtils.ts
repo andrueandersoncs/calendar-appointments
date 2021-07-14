@@ -3,8 +3,12 @@ import { getDaysInMonth, startOfMonth, endOfMonth, getDay, subDays, addDays, } f
 export const daysArr = [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ];
 export const monthsArr = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
 
+export const convertDateToInputString = (date: Date): string => date.toISOString().substring(0, 16)
+
+export const convertInputStringToDate = (input: string): Date => new Date(input)
+
 export function getMonthCells( currentDate: Date ) {
-	// Six rows of sevel days = 42 calendar cells
+	// Six rows of seven days = 42 calendar cells
 	const totalCells = 42;
 
 	// get current date
